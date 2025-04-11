@@ -1,0 +1,22 @@
+{
+  "name": "blackjack-vite",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "vite:dev": "npx vite",
+    "vite:build": "npx vite build",
+    "squint:compile": "npx squint compile",
+    "squint:watch": "npx squint watch",
+    "dev": "concurrently \"npm run vite:dev\" \"npm run squint:watch\""
+  },
+  "dependencies": {
+    "@tailwindcss/vite": "^4.1.3",
+    "squint-cljs": "^0.8.144",
+    "vite": "^6.2.6"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "tailwindcss": "^4.1.3"
+  }
+}

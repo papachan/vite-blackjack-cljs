@@ -7,12 +7,29 @@
     <link href="/src/main.css" rel="stylesheet" />
     <title></title>
   </head>
-  <body class="bg-gray-300">
+  <body class="bg-black bg-[url(/assets/green.jpg)] bg-cover bg-center bg-no-repeat">
     <div class="text-slate-800 min-h-screen flex flex-col">
       <div class="flex-grow flex items-center justify-center">
         <div class="container mx-auto px-4 max-w-4xl text-center">
-          <h1 class="text-6xl text-blue-500 font-bold mb-6">Vite.js</h1>
-          <div id="app"></div>
+          <h3 class="text-white font-bold text-3xl">Dealer</h3>
+          <div id="cardArea" class="flex justify-center">
+            <img id="card-1" src="/assets/back.png" class="m-6" />
+            <img id="card-2" src="/assets/back.png" class="m-6" />
+          </div>
+          <h3 class="text-white font-bold text-3xl">Player</h3>
+          <div id="playerArea" class="flex justify-center">
+            <img id="card-3" src="/assets/back.png" class="m-6" />
+            <img id="card-4" src="/assets/back.png" class="m-6" />
+          </div>
+          <div id="status" class="w-3/5 mt-5 ml-auto mr-auto p-4 bg-white rounded-lg shadow-2xl">
+            <div class="mb-4">
+              <span class="font-semibold">What will you do?</span>
+            </div>
+            <div class="flex items-center justify-center mb-2">
+              <button id="hitme-btn" type="button" class="text-gray-900 hover:text-white border border-gray-700 hover:bg-gray-900 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 dark:border-gray-600 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-500 dark:focus:ring-gray-800">Hit</button>
+              <button id="stay-btn" type="button" class="text-gray-900 hover:text-white border border-gray-800 hover:bg-gray-900 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 dark:border-gray-600 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-800">Stay</button>
+            </div>
+          </div>
         </div>
       </div>
     </div>

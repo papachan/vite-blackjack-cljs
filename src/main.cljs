@@ -1,19 +1,65 @@
 (ns main)
 
-(defn element [tag id child-of prepend?]
-  (or (js/document.getElementById id)
-      (let [elt (js/document.createElement tag)
-            parent (if child-of (js/document.querySelector child-of)
-                       js/document.body)]
-        (set! elt -id id)
-        (if prepend?
-          (.prepend parent elt)
-          (.appendChild parent elt))
-        elt)))
+(def ranks ["A"
+            "K"
+            "Q"
+            "J"
+            "0"
+            "9"
+            "8"
+            "7"
+            "6"
+            "5"
+            "4"
+            "3"
+            "2"])
 
-(defonce create-h1-title
-  (element "h1" "title" "#app" true))
+(def suits #{"C" "D" "S" "H"})
 
-(let [el (js/document.getElementById "title")]
-  (set! (.-innerText el) "Hello World from clojurescript")
-  (.setAttribute el "class" "font-semibold text-3xl text-gray-500 mb-6"))
+(defn rank->score [rank]
+  (cond (#{"J" "Q" "K"} rank) 10
+        (#{"A"} rank) 11
+        :else (parse-long rank)))
+
+(def all-cards
+  (into []
+        (for [rank ranks
+              suit suits]
+          {:img (str rank suit) :rank rank :score (rank->score rank)})))
+
+(defn change-card [id img]
+  (set! (.-src (js/document.getElementById id)) (str "/assets/" img)))
+
+(def counter 0)
+
+(def deck (shuffle all-cards))
+
+(def interval nil)
+
+(defn swap-cards! [n]
+  (set! counter n)
+  (change-card (str "card-" n) (-> deck
+                                   first
+                                   :img
+                                   (str ".png")))
+  (if (= 1 (count deck))
+    (js/clearInterval interval)
+    (set! deck (drop 1 deck))))
+
+(defn run-interval []
+  (set! interval (js/setInterval (fn [e]
+                                   (let [n (if (>= counter 4) 1 (inc counter))]
+                                     (swap-cards! n)))
+                                 120)))
+
+(defn init-eventhandlers []
+  (.addEventListener (js/document.getElementById "hitme-btn") "click"
+                     (fn []
+                       (js/console.log "hit me!!")))
+  (.addEventListener (js/document.getElementById "stay-btn") "click"
+                     (fn []
+                       (js/console.log "stay!!"))))
+
+(init-eventhandlers)
+
+;; (js/window.addEventListener "load" #(run-interval))

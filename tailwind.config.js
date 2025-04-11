@@ -5,6 +5,9 @@ module.exports = {
     "./*.{html}"
   ],
   theme: {
+    fontFamily: {
+      sans: ["Roboto", "sans-serif"]
+    }
     extend: {},
   },
   plugins: []

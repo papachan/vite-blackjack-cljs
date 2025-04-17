@@ -28,20 +28,25 @@
           {:img (str rank suit) :rank rank :score (rank->score rank)})))
 
 (defn change-card [id img]
-  (set! (.-src (js/document.getElementById id)) (str "/assets/" img)))
+  (set! (.-src (js/document.getElementById id)) (str "/assets/" img ".png")))
+
+(defn set-score-value [v]
+  (set! (.-innerText (js/document.getElementById "result")) v))
 
 (def counter 0)
+
+(def score 0)
 
 (def deck (shuffle all-cards))
 
 (def interval nil)
 
 (defn swap-cards! [n]
-  (set! counter n)
-  (change-card (str "card-" n) (-> deck
-                                   first
-                                   :img
-                                   (str ".png")))
+  (let [card (-> deck
+                 first
+                 :img)]
+    (set! counter n)
+    (change-card (str "card-" n) card))
   (if (= 1 (count deck))
     (js/clearInterval interval)
     (set! deck (drop 1 deck))))
@@ -51,6 +56,27 @@
                                    (let [n (if (>= counter 4) 1 (inc counter))]
                                      (swap-cards! n)))
                                  120)))
+
+(defn player-new-row [type hand]
+  (case type
+    :dealer
+    (do
+      (change-card (str "card-" 1) (first hand))
+      (change-card (str "card-" 2) (second hand)))
+
+    :player
+    (do
+      (change-card (str "card-" 3) (first hand))
+      (change-card (str "card-" 4) (second hand))))
+  (set! deck (drop 2 deck))
+  (js/console.log (count deck)))
+
+(defn start-game []
+  (set-score-value "0")
+  (let [hand [(first deck) (second deck)]]
+    (player-new-row :player (mapv #(:img %) hand)))
+  (if (= 1 (count deck))
+    (js/console.log "end games")))
 
 (defn init-eventhandlers []
   (.addEventListener (js/document.getElementById "hitme-btn") "click"
@@ -63,3 +89,5 @@
 (init-eventhandlers)
 
 ;; (js/window.addEventListener "load" #(run-interval))
+
+(start-game)

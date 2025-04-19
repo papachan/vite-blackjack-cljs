@@ -1,5 +1,11 @@
 (ns main)
 
+(def player :dealer)
+
+(def score 0)
+
+(def deck nil)
+
 (def ranks ["A"
             "K"
             "Q"
@@ -33,32 +39,6 @@
 (defn set-score-value [v]
   (set! (.-innerText (js/document.getElementById "result")) v))
 
-(def counter 0)
-
-(def player :dealer)
-
-(def score 0)
-
-(def deck nil)
-
-;; (def interval nil)
-
-;; (defn swap-cards! [n]
-;;   (let [card (-> deck
-;;                  first
-;;                  :img)]
-;;     (set! counter n)
-;;     (change-card (str "card-" n) card))
-;;   (if (= 1 (count deck))
-;;     (js/clearInterval interval)
-;;     (set! deck (drop 1 deck))))
-
-;; (defn run-interval []
-;;   (set! interval (js/setInterval (fn [e]
-;;                                    (let [n (if (>= counter 4) 1 (inc counter))]
-;;                                      (swap-cards! n)))
-;;                                  120)))
-
 (defn player-new-row [type hand]
   (case type
     :dealer
@@ -79,11 +59,8 @@
         (recur (- total 10) (dec ace-count))
         total))))
 
-(defn new-turn []
-  (let [ ;; switch player
-        who (if (= player :player) :dealer :player)
-
-        hand [(first deck) (second deck)]
+(defn new-turn [who]
+  (let [hand [(first deck) (second deck)]
         naipes (mapv #(:img %) hand)
         score (->> hand
                    (mapv #(:score %))
@@ -97,20 +74,27 @@
       (set-score-value (ace-new-score hand score)))))
 
 (defn game-run []
-  (if (= 1 (count deck))
-    (js/console.log "Game ended!!!")
-    (do
-      (new-turn)
-      (set! deck (drop 2 deck))
-      (js/console.log (count deck)))))
+  (new-turn (if (= player :player) :dealer :player))
+  (set! deck (drop 2 deck))
+  (js/console.log (count deck)
+
+  (when (zero? (count deck))
+    (js/setTimeout
+      (fn [_]
+        (js/alert "Game ended!!!"))
+      700))))
 
 (defn init-eventhandlers []
   (.addEventListener (js/document.getElementById "hitme-btn") "click"
                      (fn []
-                       (game-run)))
+                       (when (= :player player)
+                         (game-run)
+                         (js/setTimeout
+                           (fn [_]
+                             (js/alert "end of game!\n You lost!")) 700))))
   (.addEventListener (js/document.getElementById "stay-btn") "click"
                      (fn []
-                       (js/console.log "stay!!"))))
+                       (game-run))))
 
 (defn start-game []
   (set! score 0)
@@ -118,7 +102,5 @@
   (set! deck (shuffle all-cards)))
 
 (init-eventhandlers)
-
-;; (js/window.addEventListener "load" #(run-interval))
 
 (start-game)

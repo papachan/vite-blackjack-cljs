@@ -35,9 +35,11 @@
 
 (def counter 0)
 
+(def player :dealer)
+
 (def score 0)
 
-(def deck (shuffle all-cards))
+(def deck nil)
 
 (def interval nil)
 
@@ -67,20 +69,41 @@
     :player
     (do
       (change-card (str "card-" 3) (first hand))
-      (change-card (str "card-" 4) (second hand))))
-  (set! deck (drop 2 deck))
-  (js/console.log (count deck)))
+      (change-card (str "card-" 4) (second hand)))))
+
+(defn new-turn []
+  (let [;; switch player
+        who (if (= player :player) :dealer :player)
+
+        hand [(first deck) (second deck)]
+        naipes (mapv #(:img %) hand)
+        score (->> hand
+                   (mapv #(:score %))
+                   (reduce +))]
+    (js/console.log naipes)
+    (set! player who)
+    (player-new-row who naipes)
+
+    (if (some #{"A"} (mapv #(:rank %) hand))
+      (js/console.log "you have an Ace!"))))
+
+(defn game-run []
+  (if (= 1 (count deck))
+    (js/console.log "Game ended!!!")
+    (do
+      (new-turn)
+      (set! deck (drop 2 deck))
+      (js/console.log (count deck)))))
 
 (defn start-game []
-  (set-score-value "0")
-  (let [hand [(first deck) (second deck)]]
-    (player-new-row :player (mapv #(:img %) hand)))
-  (if (= 1 (count deck))
-    (js/console.log "end games")))
+  (set! score 0)
+  (set-score-value score)
+  (set! deck (shuffle all-cards)))
 
 (defn init-eventhandlers []
   (.addEventListener (js/document.getElementById "hitme-btn") "click"
                      (fn []
+                       (game-run)
                        (js/console.log "hit me!!")))
   (.addEventListener (js/document.getElementById "stay-btn") "click"
                      (fn []

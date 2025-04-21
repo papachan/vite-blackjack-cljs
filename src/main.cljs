@@ -1,6 +1,6 @@
 (ns main)
 
-(def player :dealer)
+(def current-player nil)
 
 (def score 0)
 
@@ -49,7 +49,8 @@
     :player
     (do
       (change-card (str "card-" 3) (first hand))
-      (change-card (str "card-" 4) (second hand)))))
+      (change-card (str "card-" 4) (second hand))))
+  )
 
 (defn ace-new-score [hand score]
   (if (some (comp #{"A"} :rank) hand)
@@ -67,7 +68,7 @@
         score (->> hand
                    (mapv #(:score %))
                    (reduce +))]
-    (set! player who)
+    (set! current-player who)
     (player-new-row who naipes)
 
     (->> score
@@ -75,7 +76,7 @@
          set-score-value)))
 
 (defn game-run []
-  (new-turn (if (= player :player) :dealer :player))
+  (new-turn (if (= current-player :player) :dealer :player))
   (set! deck (drop 2 deck))
 
   (when (zero? (count deck))
@@ -87,7 +88,7 @@
 (defn init-eventhandlers []
   (.addEventListener (js/document.getElementById "hitme-btn") "click"
                      (fn []
-                       (when (= :player player)
+                       (when (= :player current-player)
                          (game-run)
                          (js/setTimeout
                            (fn [_]
@@ -97,9 +98,11 @@
                        (game-run))))
 
 (defn start-game []
+  (set! current-player :dealer)
   (set! score 0)
   (set-score-value score)
-  (set! deck (shuffle all-cards)))
+  (set! deck (shuffle all-cards))
+  (game-run))
 
 (init-eventhandlers)
 

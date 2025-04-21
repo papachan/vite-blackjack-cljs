@@ -33,6 +33,10 @@
               suit suits]
           {:img (str rank suit) :rank rank :score (rank->score rank)})))
 
+(defn enable-disable-btns [bool]
+  (set! (.-disabled (js/document.getElementById "hitme-btn")) (not bool))
+  (set! (.-disabled (js/document.getElementById "stay-btn")) (not bool)))
+
 (defn change-card [id img]
   (set! (.-src (js/document.getElementById id)) (str "/assets/" img ".png")))
 
@@ -57,25 +61,26 @@
           total)))
     score))
 
-(defn swap-player []
-  (if (= :dealer *current-player*)
-    :player
-    :dealer))
+(defn whois []
+  (if (= :player *current-player*)
+    "You"
+    "Dealer"))
 
 (defn check-score [score]
   (cond
     (= 21 score) (js/setTimeout
                   (fn [_]
-                    (js/alert (str *current-player* "wins !!!")))
+                    (enable-disable-btns false)
+                    (js/alert (str (whois) " wins !!!")))
                   500)
     (= score *score*)
     (js/console.log "It's a tie!")
     (> score 21)
-    (js/console.log (str (swap-player) " wins!!!"))
+    (js/console.log (str (whois) " wins!!!"))
     (< score *score*)
-    (js/console.log (str (swap-player) " wins!!!"))
+    (js/console.log (str (whois) " wins!!!"))
     :else
-    (js/console.log (str *current-player* " wins!!!"))))
+    (js/console.log (str (whois) " wins!!!"))))
 
 (defn new-turn [who]
   (let [hand [(first *deck*) (second *deck*)]
@@ -95,14 +100,18 @@
       (set! *score* score))))
 
 (defn game-run []
+  (enable-disable-btns false)
   (new-turn (if (= *current-player* :player) :dealer :player))
   (set! *deck* (drop 2 *deck*))
 
   (when (zero? (count *deck*))
     (js/setTimeout
      (fn [_]
+       (enable-disable-btns false)
        (js/alert "No more cards! Game ended!!!"))
-     500)))
+     500))
+
+  (enable-disable-btns true))
 
 (defn init-eventhandlers []
   (.addEventListener (js/document.getElementById "hitme-btn") "click"

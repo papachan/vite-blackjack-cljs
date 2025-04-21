@@ -52,12 +52,14 @@
       (change-card (str "card-" 4) (second hand)))))
 
 (defn ace-new-score [hand score]
-  (let [ace-count (count (filter #(= "A" (:rank %)) hand))]
-    (loop [total     score
-           ace-count ace-count]
-      (if (and (> total 21) (> ace-count 0))
-        (recur (- total 10) (dec ace-count))
-        total))))
+  (if (some (comp #{"A"} :rank) hand)
+    (let [ace-count (count (filter #(= "A" (:rank %)) hand))]
+      (loop [total     score
+             ace-count ace-count]
+        (if (and (> total 21) (> ace-count 0))
+          (recur (- total 10) (dec ace-count))
+          total)))
+    score))
 
 (defn new-turn [who]
   (let [hand [(first deck) (second deck)]
@@ -68,22 +70,20 @@
     (js/console.log naipes)
     (set! player who)
     (player-new-row who naipes)
-    (set-score-value score)
 
-    (when (some (comp #{"A"} :rank) hand)
-      (js/console.log "Have an ace!!")
-      (set-score-value (ace-new-score hand score)))))
+    (->> score
+         (ace-new-score hand)
+         set-score-value)))
 
 (defn game-run []
   (new-turn (if (= player :player) :dealer :player))
   (set! deck (drop 2 deck))
-  (js/console.log (count deck)
 
   (when (zero? (count deck))
     (js/setTimeout
-      (fn [_]
-        (js/alert "Game ended!!!"))
-      700))))
+     (fn [_]
+       (js/alert "Game ended!!!"))
+     700)))
 
 (defn init-eventhandlers []
   (.addEventListener (js/document.getElementById "hitme-btn") "click"

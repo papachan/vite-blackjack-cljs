@@ -70,7 +70,8 @@
     (player-new-row who naipes)
     (set-score-value score)
 
-    (when (some #{"A"} (mapv #(:rank %) hand))
+    (when (some (comp #{"A"} :rank) hand)
+      (js/console.log "Have an ace!!")
       (set-score-value (ace-new-score hand score)))))
 
 (defn game-run []

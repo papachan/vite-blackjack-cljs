@@ -40,17 +40,12 @@
   (set! (.-innerText (js/document.getElementById "result")) v))
 
 (defn player-new-row [type hand]
-  (case type
-    :dealer
-    (do
-      (change-card (str "card-" 1) (first hand))
-      (change-card (str "card-" 2) (second hand)))
-
-    :player
-    (do
-      (change-card (str "card-" 3) (first hand))
-      (change-card (str "card-" 4) (second hand))))
-  )
+  (doall
+   (for [[idx h] (map-indexed vector hand)
+         :let [j (inc idx)]]
+     (change-card (str "card-" (if (= type :dealer)
+                                 j
+                                 (+ 2 j))) h))))
 
 (defn ace-new-score [hand score]
   (if (some (comp #{"A"} :rank) hand)

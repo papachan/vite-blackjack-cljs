@@ -2,7 +2,7 @@
 
 (def ^:dynamic *current-player* nil)
 
-(def score 0)
+(def ^:dynamic *score* 0)
 
 (def ^:dynamic *deck* nil)
 
@@ -39,7 +39,7 @@
 (defn set-score-value [v]
   (set! (.-innerText (js/document.getElementById "result")) v))
 
-(defn player-new-row [type hand]
+(defn render-new-cards [type hand]
   (doall
    (for [[idx h] (map-indexed vector hand)
          :let [j (inc idx)]]
@@ -57,18 +57,42 @@
           total)))
     score))
 
+(defn swap-player []
+  (if (= :dealer *current-player*)
+    :player
+    :dealer))
+
+(defn check-score [score]
+  (cond
+    (= 21 score) (js/setTimeout
+                  (fn [_]
+                    (js/alert (str *current-player* "wins !!!")))
+                  500)
+    (= score *score*)
+    (js/console.log "It's a tie!")
+    (> score 21)
+    (js/console.log (str (swap-player) " wins!!!"))
+    (< score *score*)
+    (js/console.log (str (swap-player) " wins!!!"))
+    :else
+    (js/console.log (str *current-player* " wins!!!"))))
+
 (defn new-turn [who]
   (let [hand [(first *deck*) (second *deck*)]
-        naipes (mapv #(:img %) hand)
-        score (->> hand
-                   (mapv #(:score %))
-                   (reduce +))]
+        naipes (mapv #(:img %) hand)]
     (set! *current-player* who)
-    (player-new-row who naipes)
+    (render-new-cards who naipes)
 
-    (->> score
-         (ace-new-score hand)
-         set-score-value)))
+    ;; compare scores
+    (let [score (->> hand
+                     (mapv #(:score %))
+                     (reduce +)
+                     (ace-new-score hand))]
+      (js/console.log "score:" score " - old score" *score*)
+      (when-not (zero? *score*)
+        (check-score score))
+      (set-score-value score)
+      (set! *score* score))))
 
 (defn game-run []
   (new-turn (if (= *current-player* :player) :dealer :player))
@@ -83,11 +107,13 @@
 (defn init-eventhandlers []
   (.addEventListener (js/document.getElementById "hitme-btn") "click"
                      (fn []
-                       (when (= :player *current-player*)
+                       (when (and (= :player *current-player*)
+                                  (not (zero? (count *deck*))))
                          (game-run)
-                         (js/setTimeout
-                           (fn [_]
-                             (js/alert "end of game!\n You lost!")) 700))))
+                         ;; (js/setTimeout
+                         ;;   (fn [_]
+                         ;;     (js/alert "end of game!\n You lost!")) 500)
+                         )))
   (.addEventListener (js/document.getElementById "stay-btn") "click"
                      (fn []
                        (when-not (zero? (count *deck*))
@@ -95,8 +121,8 @@
 
 (defn start-game []
   (set! *current-player* :dealer)
-  (set! score 0)
-  (set-score-value score)
+  (set! *score* 0)
+  (set-score-value *score*)
   (set! *deck* (shuffle all-cards))
   (game-run))
 

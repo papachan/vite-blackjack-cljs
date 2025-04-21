@@ -1,10 +1,10 @@
 (ns main)
 
-(def current-player nil)
+(def ^:dynamic *current-player* nil)
 
 (def score 0)
 
-(def deck nil)
+(def ^:dynamic *deck* nil)
 
 (def ranks ["A"
             "K"
@@ -58,12 +58,12 @@
     score))
 
 (defn new-turn [who]
-  (let [hand [(first deck) (second deck)]
+  (let [hand [(first *deck*) (second *deck*)]
         naipes (mapv #(:img %) hand)
         score (->> hand
                    (mapv #(:score %))
                    (reduce +))]
-    (set! current-player who)
+    (set! *current-player* who)
     (player-new-row who naipes)
 
     (->> score
@@ -71,32 +71,33 @@
          set-score-value)))
 
 (defn game-run []
-  (new-turn (if (= current-player :player) :dealer :player))
-  (set! deck (drop 2 deck))
+  (new-turn (if (= *current-player* :player) :dealer :player))
+  (set! *deck* (drop 2 *deck*))
 
-  (when (zero? (count deck))
+  (when (zero? (count *deck*))
     (js/setTimeout
      (fn [_]
-       (js/alert "Game ended!!!"))
-     700)))
+       (js/alert "No more cards! Game ended!!!"))
+     500)))
 
 (defn init-eventhandlers []
   (.addEventListener (js/document.getElementById "hitme-btn") "click"
                      (fn []
-                       (when (= :player current-player)
+                       (when (= :player *current-player*)
                          (game-run)
                          (js/setTimeout
                            (fn [_]
                              (js/alert "end of game!\n You lost!")) 700))))
   (.addEventListener (js/document.getElementById "stay-btn") "click"
                      (fn []
-                       (game-run))))
+                       (when-not (zero? (count *deck*))
+                         (game-run)))))
 
 (defn start-game []
-  (set! current-player :dealer)
+  (set! *current-player* :dealer)
   (set! score 0)
   (set-score-value score)
-  (set! deck (shuffle all-cards))
+  (set! *deck* (shuffle all-cards))
   (game-run))
 
 (init-eventhandlers)

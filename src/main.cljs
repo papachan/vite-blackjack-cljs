@@ -67,7 +67,6 @@
         score (->> hand
                    (mapv #(:score %))
                    (reduce +))]
-    (js/console.log naipes)
     (set! player who)
     (player-new-row who naipes)
 

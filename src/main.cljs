@@ -100,7 +100,7 @@
                      (mapv #(:score %))
                      (reduce +)
                      (ace-new-score hand))]
-      (js/console.log "score:" score " - old score" *score*)
+      (js/console.log "new score:" score " - old score" *score*)
       (when-not (zero? *score*)
         (check-score score))
       (set-score-value score)
@@ -125,11 +125,7 @@
                      (fn []
                        (when (and (= :player *current-player*)
                                   (not (zero? (count *deck*))))
-                         (game-run)
-                         ;; (js/setTimeout
-                         ;;   (fn [_]
-                         ;;     (js/alert "end of game!\n You lost!")) 500)
-                         )))
+                         (game-run))))
   (.addEventListener (js/document.getElementById "stay-btn") "click"
                      (fn []
                        (when-not (zero? (count *deck*))

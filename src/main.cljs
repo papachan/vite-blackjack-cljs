@@ -61,26 +61,33 @@
           total)))
     score))
 
-(defn whois []
+(defn whois? []
   (if (= :player *current-player*)
     "You"
     "Dealer"))
 
+(defn swap-player []
+  (if (= :player *current-player*)
+    "Dealer"
+    "You"))
+
 (defn check-score [score]
   (cond
+    (= score *score*)
+    (js/console.log "It's a tie!")
+
     (= 21 score) (js/setTimeout
                   (fn [_]
                     (enable-disable-btns false)
-                    (js/alert (str (whois) " wins !!!")))
+                    (js/alert (str (whois?) " wins !!!")))
                   500)
-    (= score *score*)
-    (js/console.log "It's a tie!")
-    (> score 21)
-    (js/console.log (str (whois) " wins!!!"))
-    (< score *score*)
-    (js/console.log (str (whois) " wins!!!"))
+
+    (or (> score 21)
+        (< score *score*))
+    (js/console.log (str (swap-player) " wins!!!"))
+
     :else
-    (js/console.log (str (whois) " wins!!!"))))
+    (js/console.log (str (whois?) " wins!!!"))))
 
 (defn new-turn [who]
   (let [hand [(first *deck*) (second *deck*)]
